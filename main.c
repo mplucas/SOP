@@ -2,11 +2,18 @@
 #include <stdlib.h>
 //#include <pthread.h>
 
-// compilar: gcc -Wall -pthread -o prog prog.c
+#include "libSOP.h"
+
+// compilar: gcc -Wall -pthread libSOP.c main.c
+// ou gcc -Wall libSOP.c main.c
+// executar: ./a.out 1 a
 int main( int argc, char *argv[] ) {
 
-  int nthr;
+  setbuf(stdout, NULL);
+
+  int   nthr;
   char* nomearq;
+  listaDupla* listaLE;
 
   if( argc != 3 ){
     printf( "Parametros nao informados!! %i", argc );
@@ -17,6 +24,8 @@ int main( int argc, char *argv[] ) {
   nomearq = argv[2];
 
   printf( "\n nthr: %i \n nomearq: %s ", nthr, nomearq );
+
+  listaLE = leArqEstoque( nomearq );
 
   return 0;
 
