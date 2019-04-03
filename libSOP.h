@@ -3,7 +3,7 @@
 typedef struct le
 {
 
-  char*        nome;
+  char     nome[50];
   unsigned int preco;
   unsigned int quantidade;
 

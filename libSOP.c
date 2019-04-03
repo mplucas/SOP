@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "libSOP.h"
+#include "utils.h"
 
 listaDupla* criarListaDupla(){
 
@@ -92,6 +93,21 @@ lancheEstoque buscaPorNome( listaDupla* lista, char* nomeBusca ){
 	return lancheEncontrado;
 }
 
+void mostraLista( listaDupla* lista ){
+
+	noDupla* n;
+
+	n = lista->primeiro;
+
+	while( n != NULL ){
+
+		printf( fmtestoque, n->le.nome, n->le.preco, n->le.quantidade );
+		n = n->proximo;
+
+	}
+
+}
+
 int contaLinhasArq( char* nomearq ){
 
   FILE* f;
@@ -122,15 +138,15 @@ int contaLinhasArq( char* nomearq ){
 
 listaDupla* leArqEstoque( char* nomearq ){
 
-  FILE *f;
-  int  nLinhas;
-  int  i;
+  FILE* f;
+  int   nLinhas;
+  int   i;
+	char  cAux[50];
   lancheEstoque leAux;
   listaDupla*   lista;
 
   lista = criarListaDupla();
-
-  f = fopen( nomearq, "r" );
+  f     = fopen( nomearq, "r" );
 
   if( f == NULL ){
       printf("\nDeu merda no arquivo!\n");
@@ -139,12 +155,15 @@ listaDupla* leArqEstoque( char* nomearq ){
   nLinhas = contaLinhasArq( nomearq );
 
   for( i = 0; i < nLinhas; i++ ){
-    fscanf( f, "%s\t%u\t%u\n", leAux.nome, &leAux.preco, &leAux.quantidade );
-    printf("%s\t%u\t%u\n", leAux.nome, leAux.preco, leAux.quantidade );
+    fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
+		strcpy( leAux.nome, cAux );
+		//printf( fmtestoque, leAux.nome, leAux.preco, leAux.quantidade );
     pushBack( lista, leAux );
   }
 
   fclose( f );
+
+	mostraLista( lista );
 
   return lista;
 

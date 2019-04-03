@@ -23,8 +23,6 @@ int main( int argc, char *argv[] ) {
   nthr = atoi( argv[1] );
   nomearq = argv[2];
 
-  printf( "\n nthr: %i \n nomearq: %s ", nthr, nomearq );
-
   listaLE = leArqEstoque( nomearq );
 
   return 0;
