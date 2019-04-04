@@ -136,12 +136,23 @@ int contaLinhasArq( char* nomearq ){
 
 }
 
+char* leNome( char buffer[1000] ){
+
+	char* result;
+
+	result = malloc( sizeof( char ) * strlen( buffer ) );
+	strcpy( result, buffer );
+
+	return result;
+
+}
+
 listaDupla* leArqEstoque( char* nomearq ){
 
   FILE* f;
   int   nLinhas;
   int   i;
-	char  cAux[50];
+  char  cAux[1000];
   lancheEstoque leAux;
   listaDupla*   lista;
 
@@ -149,15 +160,15 @@ listaDupla* leArqEstoque( char* nomearq ){
   f     = fopen( nomearq, "r" );
 
   if( f == NULL ){
-      printf("\nDeu merda no arquivo!\n");
+      printf("\nErro na abertura do arquivo!\n");
   }
 
   nLinhas = contaLinhasArq( nomearq );
 
   for( i = 0; i < nLinhas; i++ ){
     fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
-		strcpy( leAux.nome, cAux );
-		//printf( fmtestoque, leAux.nome, leAux.preco, leAux.quantidade );
+	leAux.nome = leNome( cAux );
+	//printf( fmtestoque, cAux, leAux.preco, leAux.quantidade );
     pushBack( lista, leAux );
   }
 
