@@ -181,7 +181,24 @@ listaDupla* leArqEstoque( char* nomearq ){
 }
 
 void *PrintHello(void *arg){
+
 	long tid = (long)arg;
 	printf("Alo da thread %ld\n",tid);
 	pthread_exit(NULL);
+
+}
+
+/* sinaliza_thread_pronta_e_espera_demais();
+enquanto (houver pedidos a processar) {
+	pedido = le_prox_linha_arq_pedidos();
+	se (pedido puder ser atendido) {
+		retira_lanches_estoque();
+		enfileira_caixa(id, valor);
+	}
+} */
+
+void *processaPredido(){
+
+	
+
 }

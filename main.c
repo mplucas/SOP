@@ -5,8 +5,7 @@
 #include "libSOP.h"
 
 // compilar: gcc -Wall -pthread libSOP.c main.c
-// ou gcc -Wall libSOP.c main.c
-// executar: ./a.out 1 a
+// executar: ./a.out 2 a
 int main( int argc, char *argv[] ) {
 
   setbuf(stdout, NULL);
@@ -15,7 +14,7 @@ int main( int argc, char *argv[] ) {
   char  *nomearq;
   listaDupla *listaLE;
   pthread_t  *threads;
-  int rc;
+  int  rc;
   long t;
 
   if( argc != 3 ){
@@ -30,13 +29,15 @@ int main( int argc, char *argv[] ) {
 
   threads = malloc( sizeof( pthread_t ) * nthr );
 
-  for( t = 0; t < nthr; t++){
-      printf("main criando uma thread %ld\n", t);
-      rc = pthread_create( threads + t, NULL, PrintHello, (void*) t);
-      if(rc){
-          printf("ERRO - rc=%d\n", rc);
-          exit(-1);
+  for( t = 0; t < nthr; t++ ){
+
+      printf( "main criando uma thread %ld\n", t );
+      rc = pthread_create( threads + t, NULL, PrintHello, ( void* ) t );
+      if( rc ){
+          printf( "ERRO - rc=%d\n", rc );
+          exit( -1 );
       }
+
   }
   pthread_exit(NULL);
 
