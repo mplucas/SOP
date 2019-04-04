@@ -30,3 +30,4 @@ void pushFront( listaDupla* lista, lancheEstoque le );
 int size( listaDupla* lista );
 lancheEstoque buscaPorNome( listaDupla* lista, char* nomeBusca );
 listaDupla* leArqEstoque( char* nomearq );
+void *PrintHello(void *arg);

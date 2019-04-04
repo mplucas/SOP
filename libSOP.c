@@ -174,8 +174,14 @@ listaDupla* leArqEstoque( char* nomearq ){
 
   fclose( f );
 
-	mostraLista( lista );
+  //mostraLista( lista );
 
   return lista;
 
+}
+
+void *PrintHello(void *arg){
+	long tid = (long)arg;
+	printf("Alo da thread %ld\n",tid);
+	pthread_exit(NULL);
 }
