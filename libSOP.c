@@ -75,22 +75,20 @@ int size( listaDupla* lista ){
 
 }
 
-lancheEstoque buscaPorNome( listaDupla* lista, char* nomeBusca ){
+noDupla* buscaPorNome( listaDupla* lista, char* nomeBusca ){
 
-	noDupla* no;
-  lancheEstoque lancheEncontrado;
+	noDupla *no;
 
 	no = lista->primeiro;
 
 	while(no != NULL){
 		if( strcmp( no->le.nome, nomeBusca ) == 0 ){
-			lancheEncontrado = no->le;
-      break;
+      		break;
 		}
 		no = no->proximo;
 	}
 
-	return lancheEncontrado;
+	return no;
 }
 
 void mostraLista( listaDupla* lista ){
@@ -197,8 +195,19 @@ enquanto (houver pedidos a processar) {
 	}
 } */
 
-void *processaPredido(){
+void *processaPredido( void *arg ){
 
-	
+	long tid;
+	char cTid[1000];
+	char* nomePed;
+
+	tid = (long)arg;
+	sprintf( cTid, "%i", tid + 1 );
+	nomePed = malloc( sizeof( char ) * ( strlen( nomearq ) + strlen( cTid ) + 1 ) );
+	strcpy( nomePed, nomearq );
+	strcat( nomePed, "-" );
+	strcat( nomePed, cTid );
+
+	printf( "\n Essa thread processará o arquivo %s", nomePed );
 
 }
