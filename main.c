@@ -7,6 +7,9 @@
 
 listaDupla *listaLE;
 char *nomearq;
+pthread_mutex_t m;
+int fimThreads = 0;
+pthread_cond_t condFim;
 
 /* inicializa_lanches(arq_ofertas);
 cria_threads();
@@ -16,6 +19,7 @@ imprime_estoque(); */
 
 // compilar: gcc -Wall -pthread libSOP.c main.c
 // executar: ./a.out 2 a
+// testes: for i in `seq 1 10`; do ./a.out 2 a; done
 int main( int argc, char *argv[] ) {
 
   setbuf(stdout, NULL);
@@ -47,6 +51,14 @@ int main( int argc, char *argv[] ) {
       }
 
   }
+
+  while( fimThreads != nthr ){
+    pthread_cond_wait( &condFim, &m );
+  }
+
+  printf( "\nLista após execucao das threads:\n" );
+  mostraLista( listaLE );
+
   pthread_exit(NULL);
 
   printf( "\nLista após execucao das threads:\n" );

@@ -165,8 +165,8 @@ listaDupla* leArqEstoque( char* nomearq ){
 
   for( i = 0; i < nLinhas; i++ ){
     fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
-	leAux.nome = leNome( cAux );
-	//printf( fmtestoque, cAux, leAux.preco, leAux.quantidade );
+		leAux.nome = leNome( cAux );
+		//printf( fmtestoque, cAux, leAux.preco, leAux.quantidade );
     pushBack( lista, leAux );
   }
 
@@ -197,17 +197,49 @@ enquanto (houver pedidos a processar) {
 
 void *processaPredido( void *arg ){
 
-	long tid;
-	char cTid[1000];
+	long  tid;
+	char  cAux[1000];
+	char* nomeArqPed;
 	char* nomePed;
+	int   nLinhas;
+	int   i;
+	int   quantPed;
+	FILE* f;
+	noDupla* noAux;
 
 	tid = (long)arg;
-	sprintf( cTid, "%i", tid + 1 );
-	nomePed = malloc( sizeof( char ) * ( strlen( nomearq ) + strlen( cTid ) + 1 ) );
-	strcpy( nomePed, nomearq );
-	strcat( nomePed, "-" );
-	strcat( nomePed, cTid );
+	sprintf( cAux, "%i", tid + 1 );
+	nomeArqPed = malloc( sizeof( char ) * ( strlen( nomearq ) + strlen( cAux ) + 1 ) );
+	strcpy( nomeArqPed, nomearq );
+	strcat( nomeArqPed, "-" );
+	strcat( nomeArqPed, cAux );
+	f = fopen( nomeArqPed, "r" );
 
-	printf( "\n Essa thread processará o arquivo %s", nomePed );
+  if( f == NULL ){
+      printf("\nErro na abertura do arquivo!\n");
+  }
+
+	nLinhas = contaLinhasArq( nomeArqPed );
+
+  for( i = 0; i < nLinhas; i++ ){
+
+    fscanf( f, "%s\t%u\n", cAux, &quantPed );
+		nomePed = leNome( cAux );
+		noAux = buscaPorNome( listaLE, nomePed );
+
+		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
+
+			pthread_mutex_lock( &m );
+			noAux->le.quantidade -= quantPed;
+			pthread_mutex_unlock( &m );
+
+		}
+
+  }
+
+	fimThreads++;
+	pthread_cond_signal( &condFim );
+
+  fclose( f );
 
 }
