@@ -5,11 +5,12 @@
 #include "libSOP.h"
 #include "utils.h"
 
-listaEstoque *listaLE;
+listaEstoque *lEstoque;
 char *nomearq;
 pthread_mutex_t m;
 int fimThreads = 0;
 pthread_cond_t condFim;
+listaPedido *lPedido;
 
 /* inicializa_lanches(arq_ofertas);
 cria_threads();
@@ -36,11 +37,12 @@ int main( int argc, char *argv[] ) {
 
   nthr    = atoi( argv[1] );
   nomearq = argv[2];
-  listaLE = leArqEstoque( nomearq );
+  lEstoque = leArqEstoque( nomearq );
+  lPedido = criarLDP();
   threads = malloc( sizeof( pthread_t ) * nthr );
 
-  printf( "\nLista antes da execucao das threads:\n" );
-  mostraLista( listaLE );
+  printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
+  mostraLDE( lEstoque );
 
   for( t = 0; t < nthr; t++ ){
 
@@ -53,16 +55,17 @@ int main( int argc, char *argv[] ) {
   }
 
   while( fimThreads != nthr ){
+    printf( "\n fimThreads: %i | nthr: %i", fimThreads, nthr );
     pthread_cond_wait( &condFim, &m );
   }
 
   printf( "\nLista após execucao das threads:\n" );
-  mostraLista( listaLE );
+  mostraLDE( lEstoque );
+  printf( "------------------------------------\n" );
+  printf( "Lista de valores de pedido por atendente:\n" );
+  mostraLDP( lPedido );
 
   pthread_exit(NULL);
-
-  printf( "\nLista após execucao das threads:\n" );
-  mostraLista( listaLE );
 
   return 0;
 

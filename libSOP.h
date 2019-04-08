@@ -36,18 +36,14 @@ typedef struct np
 
 typedef struct ldp
 {
-	noEstoque* primeiro;
-	noEstoque* ultimo;
+	noPedido* primeiro;
+	noPedido* ultimo;
 } listaPedido;
 
 // Funcoes
 
-listaEstoque* criarListaDupla();
-void pushBack( listaEstoque* lista, lancheEstoque le );
-void pushFront( listaEstoque* lista, lancheEstoque le );
-int size( listaEstoque* lista );
-noEstoque* buscaPorNome( listaEstoque* lista, char* nomeBusca );
 listaEstoque* leArqEstoque( char* nomearq );
-void *PrintHello(void *arg);
-void mostraLista( listaEstoque* lista );
+void mostraLDE( listaEstoque* lista );
 void *processaPredido( void *arg );
+listaPedido* criarLDP();
+void mostraLDP( listaPedido* lista );
