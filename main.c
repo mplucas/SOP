@@ -5,7 +5,7 @@
 #include "libSOP.h"
 #include "utils.h"
 
-listaDupla *listaLE;
+listaEstoque *listaLE;
 char *nomearq;
 pthread_mutex_t m;
 int fimThreads = 0;

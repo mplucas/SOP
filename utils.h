@@ -3,7 +3,7 @@
 #define fmtestoque "%-15s   %7u   %8u\n"
 
 extern char *nomearq;
-extern listaDupla *listaLE;
+extern listaEstoque *listaLE;
 extern pthread_mutex_t m;
 extern int fimThreads;
 extern pthread_cond_t condFim;

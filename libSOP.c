@@ -6,9 +6,9 @@
 #include "libSOP.h"
 #include "utils.h"
 
-listaDupla* criarListaDupla(){
+listaEstoque* criarListaDupla(){
 
-	listaDupla* lista = malloc( sizeof( listaDupla ) );
+	listaEstoque* lista = malloc( sizeof( listaEstoque ) );
 
 	lista->primeiro   = NULL;
 	lista->ultimo     = NULL;
@@ -17,9 +17,9 @@ listaDupla* criarListaDupla(){
 
 }
 
-noDupla* criarNo( lancheEstoque le ){
+noEstoque* criarNo( lancheEstoque le ){
 
-	noDupla* no  = malloc( sizeof( noDupla ) );
+	noEstoque* no  = malloc( sizeof( noEstoque ) );
 
 	no->proximo  = NULL;
 	no->anterior = NULL;
@@ -29,10 +29,10 @@ noDupla* criarNo( lancheEstoque le ){
 
 }
 
-void pushBack( listaDupla* lista, lancheEstoque le ){
+void pushBack( listaEstoque* lista, lancheEstoque le ){
 
-  noDupla* n = criarNo( le );
-	noDupla* temp = lista->ultimo;
+  noEstoque* n = criarNo( le );
+	noEstoque* temp = lista->ultimo;
 
 	if(temp != NULL){
 		temp->proximo = n;
@@ -45,10 +45,10 @@ void pushBack( listaDupla* lista, lancheEstoque le ){
 
 }
 
-void pushFront( listaDupla* lista, lancheEstoque le ){
+void pushFront( listaEstoque* lista, lancheEstoque le ){
 
-  noDupla* n    = criarNo( le );
-	noDupla* temp = lista->primeiro;
+  noEstoque* n    = criarNo( le );
+	noEstoque* temp = lista->primeiro;
 
 	if(temp != NULL){
 		temp->anterior  = n;
@@ -61,9 +61,9 @@ void pushFront( listaDupla* lista, lancheEstoque le ){
 
 }
 
-int size( listaDupla* lista ){
+int size( listaEstoque* lista ){
 
-  noDupla* temp = lista->primeiro;
+  noEstoque* temp = lista->primeiro;
 	int size      = 0;
 
 	while(temp != NULL){
@@ -75,9 +75,9 @@ int size( listaDupla* lista ){
 
 }
 
-noDupla* buscaPorNome( listaDupla* lista, char* nomeBusca ){
+noEstoque* buscaPorNome( listaEstoque* lista, char* nomeBusca ){
 
-	noDupla *no;
+	noEstoque *no;
 
 	no = lista->primeiro;
 
@@ -91,9 +91,9 @@ noDupla* buscaPorNome( listaDupla* lista, char* nomeBusca ){
 	return no;
 }
 
-void mostraLista( listaDupla* lista ){
+void mostraLista( listaEstoque* lista ){
 
-	noDupla* n;
+	noEstoque* n;
 
 	n = lista->primeiro;
 
@@ -145,14 +145,14 @@ char* leNome( char buffer[1000] ){
 
 }
 
-listaDupla* leArqEstoque( char* nomearq ){
+listaEstoque* leArqEstoque( char* nomearq ){
 
   FILE* f;
   int   nLinhas;
   int   i;
   char  cAux[1000];
   lancheEstoque leAux;
-  listaDupla*   lista;
+  listaEstoque*   lista;
 
   lista = criarListaDupla();
   f     = fopen( nomearq, "r" );
@@ -205,7 +205,7 @@ void *processaPredido( void *arg ){
 	int   i;
 	int   quantPed;
 	FILE* f;
-	noDupla* noAux;
+	noEstoque* noAux;
 
 	tid = (long)arg;
 	sprintf( cAux, "%i", tid + 1 );

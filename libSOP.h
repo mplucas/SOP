@@ -1,35 +1,53 @@
 // Structs
-
+// Estoque
 typedef struct le
 {
-
-  char     *nome;
+  char *nome;
   unsigned int preco;
   unsigned int quantidade;
-
 } lancheEstoque;
 
-typedef struct nd
+typedef struct ne
 {
 	lancheEstoque le;
-	struct nd*    proximo;
-	struct nd*    anterior;
-} noDupla;
+	struct ne*    proximo;
+	struct ne*    anterior;
+} noEstoque;
 
-typedef struct ld
+typedef struct lde
 {
-	noDupla* primeiro;
-	noDupla* ultimo;
-} listaDupla;
+	noEstoque* primeiro;
+	noEstoque* ultimo;
+} listaEstoque;
+
+// Pedidos
+typedef struct lp
+{
+  unsigned int atendente;
+  unsigned int valor;
+} lanchePedido;
+
+typedef struct np
+{
+	lanchePedido lp;
+	struct ne*   proximo;
+	struct ne*   anterior;
+} noPedido;
+
+typedef struct ldp
+{
+	noEstoque* primeiro;
+	noEstoque* ultimo;
+} listaPedido;
 
 // Funcoes
 
-listaDupla* criarListaDupla();
-void pushBack( listaDupla* lista, lancheEstoque le );
-void pushFront( listaDupla* lista, lancheEstoque le );
-int size( listaDupla* lista );
-noDupla* buscaPorNome( listaDupla* lista, char* nomeBusca );
-listaDupla* leArqEstoque( char* nomearq );
+listaEstoque* criarListaDupla();
+void pushBack( listaEstoque* lista, lancheEstoque le );
+void pushFront( listaEstoque* lista, lancheEstoque le );
+int size( listaEstoque* lista );
+noEstoque* buscaPorNome( listaEstoque* lista, char* nomeBusca );
+listaEstoque* leArqEstoque( char* nomearq );
 void *PrintHello(void *arg);
-void mostraLista( listaDupla* lista );
+void mostraLista( listaEstoque* lista );
 void *processaPredido( void *arg );
