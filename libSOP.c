@@ -289,22 +289,24 @@ void *processaPredido( void *arg ){
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
 			printf("\n Travando mutex thread %li, linha %i", tid, i );
-			pthread_mutex_lock( &m );
+			pthread_mutex_lock( &mtxPedido );
 			printf("\n Travou mutex thread %li, linha %i", tid, i );
 			// retira produtos do estoque
 			noAux->le.quantidade -= quantPed;
 			// adiciona pedido na fila para processamento do caixa
 			pushBackLDP( lPedido, tid, noAux->le.preco * quantPed );
 			printf("\n Destravou mutex thread %li, linha %i", tid, i );
-			pthread_mutex_unlock( &m );
+			pthread_mutex_unlock( &mtxPedido );
 
 		}
 
   }
 
+	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
 	pthread_cond_signal( &condFim );
 	printf("\n Sinalizou thread %li | fimThreads = %i", tid, fimThreads );
+	pthread_mutex_unlock( &mtxFimPedido );
 
   fclose( f );
 

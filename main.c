@@ -7,7 +7,8 @@
 
 listaEstoque *lEstoque;
 char *nomearq;
-pthread_mutex_t m;
+pthread_mutex_t mtxPedido;
+pthread_mutex_t mtxFimPedido;
 int fimThreads = 0;
 pthread_cond_t condFim;
 listaPedido *lPedido;
@@ -54,10 +55,13 @@ int main( int argc, char *argv[] ) {
 
   }
 
+  pthread_mutex_lock( &mtxFimPedido );
   while( fimThreads != nthr ){
     printf( "\n fimThreads: %i | nthr: %i", fimThreads, nthr );
-    pthread_cond_wait( &condFim, &m );
+    pthread_cond_wait( &condFim, &mtxFimPedido );
+    printf( "\n sai do condwait fimThreads: %i", fimThreads );
   }
+  pthread_mutex_unlock( &mtxFimPedido );
 
   printf( "\nLista após execucao das threads:\n" );
   mostraLDE( lEstoque );

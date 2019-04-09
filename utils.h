@@ -4,7 +4,8 @@
 
 extern char *nomearq;
 extern listaEstoque *lEstoque;
-extern pthread_mutex_t m;
+extern pthread_mutex_t mtxPedido;
+extern pthread_mutex_t mtxFimPedido;
 extern int fimThreads;
 extern pthread_cond_t condFim;
 extern listaPedido *lPedido;
