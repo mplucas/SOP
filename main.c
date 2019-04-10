@@ -37,12 +37,12 @@ int main( int argc, char *argv[] ) {
         return 0;
     }
 
-    nthr    = atoi( argv[1] );
-    nomearq = argv[2];
-    lEstoque = leArqEstoque( nomearq );
-    lPedido = criarLDP();
+    nthr       = atoi( argv[1] );
+    nomearq    = argv[2];
+    lEstoque   = leArqEstoque( nomearq );
+    lPedido    = criarLDP();
     tAtendente = malloc( sizeof( pthread_t ) * nthr );
-    tCaixa = malloc( sizeof( pthread_t ) );
+    tCaixa     = malloc( sizeof( pthread_t ) );
 
     printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
     mostraLDE( lEstoque );
@@ -72,11 +72,11 @@ int main( int argc, char *argv[] ) {
     }
     pthread_mutex_unlock( &mtxFimPedido );
 
-    printf( "\nLista após execucao das threads:\n" );
-    mostraLDE( lEstoque );
-    printf( "------------------------------------\n" );
-    printf( "Lista de valores de pedido por atendente:\n" );
-    mostraLDP( lPedido );
+    // printf( "\nLista após execucao das threads:\n" );
+    // mostraLDE( lEstoque );
+    // printf( "------------------------------------\n" );
+    // printf( "Lista de valores de pedido por atendente:\n" );
+    // mostraLDP( lPedido );
 
     pthread_exit(NULL);
 

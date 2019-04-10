@@ -10,8 +10,8 @@ listaEstoque* criarLDE(){
 
 	listaEstoque* lista = malloc( sizeof( listaEstoque ) );
 
-	lista->primeiro   = NULL;
-	lista->ultimo     = NULL;
+	lista->primeiro = NULL;
+	lista->ultimo   = NULL;
 
 	return lista;
 
@@ -19,11 +19,11 @@ listaEstoque* criarLDE(){
 
 noEstoque* criarNoLDE( lancheEstoque le ){
 
-	noEstoque* no  = malloc( sizeof( noEstoque ) );
+	noEstoque* no = malloc( sizeof( noEstoque ) );
 
-	no->proximo  = NULL;
-	no->anterior = NULL;
-	no->le       = le;
+	no->proximo   = NULL;
+	no->anterior  = NULL;
+	no->le        = le;
 
 	return no;
 
@@ -31,7 +31,7 @@ noEstoque* criarNoLDE( lancheEstoque le ){
 
 void pushBackLDE( listaEstoque* lista, lancheEstoque le ){
 
-  noEstoque* n = criarNoLDE( le );
+	noEstoque* n    = criarNoLDE( le );
 	noEstoque* temp = lista->ultimo;
 
 	if(temp != NULL){
@@ -113,8 +113,8 @@ listaPedido* criarLDP(){
 
 	listaPedido* lista = malloc( sizeof( listaPedido ) );
 
-	lista->primeiro   = NULL;
-	lista->ultimo     = NULL;
+	lista->primeiro    = NULL;
+	lista->ultimo      = NULL;
 
 	return lista;
 
@@ -123,11 +123,11 @@ listaPedido* criarLDP(){
 noPedido* criarNoLDP( unsigned int atendente, unsigned int valor ){
 
 	lanchePedido lp;
-	noPedido* no;
+	noPedido*    no;
 
 	lp.atendente = atendente;
-	lp.valor = valor;
-	no  = malloc( sizeof( noPedido ) );
+	lp.valor     = valor;
+	no           = malloc( sizeof( noPedido ) );
 	no->proximo  = NULL;
 	no->anterior = NULL;
 	no->lp       = lp;
@@ -138,7 +138,7 @@ noPedido* criarNoLDP( unsigned int atendente, unsigned int valor ){
 
 void pushBackLDP( listaPedido* lista, unsigned int atendente, unsigned int valor ){
 
-	noPedido* n = criarNoLDP( atendente, valor );
+	noPedido* n    = criarNoLDP( atendente, valor );
 	noPedido* temp = lista->ultimo;
 
 	if(temp != NULL){
@@ -166,7 +166,7 @@ void popBackLDP( listaPedido* lista ){
 int sizeLDP( listaPedido* lista ){
 
   noPedido* temp = lista->primeiro;
-	int sizeLDP    = 0;
+	int sizeLDP = 0;
 
 	while(temp != NULL){
 		temp = temp->proximo;
@@ -238,7 +238,7 @@ listaEstoque* leArqEstoque( char* nomearq ){
 	int   i;
 	char  cAux[1000];
 	lancheEstoque leAux;
-	listaEstoque*   lista;
+	listaEstoque* lista;
 
 	lista = criarLDE();
 	f     = fopen( nomearq, "r" );
@@ -311,7 +311,7 @@ void *processaPedido( void *arg ){
 
 		fscanf( f, "%s\t%u\n", cAux, &quantPed );
 		nomePed = leNome( cAux );
-		noAux = buscaPorNomeLDE( lEstoque, nomePed );
+		noAux   = buscaPorNomeLDE( lEstoque, nomePed );
 
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
@@ -332,6 +332,20 @@ void *processaPedido( void *arg ){
 	pthread_mutex_unlock( &mtxFimPedido );
 
 	fclose( f );
+
+}
+
+
+void printMatrix( int** m ){
+
+	int i, j;
+
+	for( i = 0; i < nthr; i++ ){
+		printf( "\n" );
+		for( j = 0; j < 3; j++ ){
+			printf( "%i ", m[ i ][ j ] );
+		}
+	}
 
 }
 
@@ -374,5 +388,9 @@ void *processaCaixa( void *arg ){
 		pthread_mutex_unlock( &mtxPedido );
 
 	}
+
+	printf( "\n Populada matriz de relatorio.\n" );
+
+	printMatrix( relatorio );
 
 }
