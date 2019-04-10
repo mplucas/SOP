@@ -44,6 +44,7 @@ typedef struct ldp
 
 listaEstoque* leArqEstoque( char* nomearq );
 void mostraLDE( listaEstoque* lista );
-void *processaPredido( void *arg );
+void *processaPedido( void *arg );
 listaPedido* criarLDP();
 void mostraLDP( listaPedido* lista );
+void *processaCaixa( void *arg );

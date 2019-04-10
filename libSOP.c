@@ -64,7 +64,7 @@ void pushFrontLDE( listaEstoque* lista, lancheEstoque le ){
 int sizeLDE( listaEstoque* lista ){
 
   noEstoque* temp = lista->primeiro;
-	int sizeLDE      = 0;
+	int sizeLDE     = 0;
 
 	while(temp != NULL){
 		temp = temp->proximo;
@@ -147,6 +147,31 @@ void pushBackLDP( listaPedido* lista, unsigned int atendente, unsigned int valor
 		lista->primeiro = n;
 		lista->ultimo   = n;
 	}
+
+}
+
+void popBackLDP( listaPedido* lista ){
+
+	noPedido* ultimo = lista->ultimo;
+
+	if(ultimo != NULL){
+		ultimo->anterior->proximo = NULL;
+		free( ultimo );
+	}
+
+}
+
+int sizeLDP( listaPedido* lista ){
+
+  noPedido* temp = lista->primeiro;
+	int sizeLDP    = 0;
+
+	while(temp != NULL){
+		temp = temp->proximo;
+		sizeLDP++;
+	}
+
+	return sizeLDP;
 
 }
 
@@ -254,7 +279,7 @@ enquanto (houver pedidos a processar) {
 	}
 } */
 
-void *processaPredido( void *arg ){
+void *processaPedido( void *arg ){
 
 	long  tid;
 	char  cAux[1000];
@@ -288,14 +313,11 @@ void *processaPredido( void *arg ){
 
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
-			printf("\n Travando mutex thread %li, linha %i", tid, i );
 			pthread_mutex_lock( &mtxPedido );
-			printf("\n Travou mutex thread %li, linha %i", tid, i );
 			// retira produtos do estoque
 			noAux->le.quantidade -= quantPed;
 			// adiciona pedido na fila para processamento do caixa
-			pushBackLDP( lPedido, tid, noAux->le.preco * quantPed );
-			printf("\n Destravou mutex thread %li, linha %i", tid, i );
+			pushBackLDP( lPedido, tid + 1, noAux->le.preco * quantPed );
 			pthread_mutex_unlock( &mtxPedido );
 
 		}
@@ -305,9 +327,50 @@ void *processaPredido( void *arg ){
 	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
 	pthread_cond_signal( &condFim );
-	printf("\n Sinalizou thread %li | fimThreads = %i", tid, fimThreads );
 	pthread_mutex_unlock( &mtxFimPedido );
 
   fclose( f );
+
+}
+
+void *processaCaixa( void *arg ){
+	printf( "\nEntrou em caixa.\n" );
+
+	// matriz para mostrar as informacoes do relatorio financeiro
+	// [x][0] - Atendente
+	// [x][1] - Pedidos
+	// [x][2] - Valor
+	int **relatorio;
+	int i;
+	noPedido *noAux;
+
+	printf( "\nEntrou em caixa.\n" );
+	// incializa matriz para guardar valores do relatorio
+	relatorio = malloc( sizeof( int* ) * nthr );
+	for( i = 0; i < nthr; i++ ){
+		relatorio[ i ] = malloc( sizeof( int ) * 3 );
+		relatorio[ i ][ 0 ] = 0;
+		relatorio[ i ][ 1 ] = 0;
+		relatorio[ i ][ 2 ] = 0;
+	}
+	printf( "\n Alocado matriz de relatorio[%i][3].\n", nthr );
+
+	while( fimThreads != nthr ){
+
+		pthread_mutex_lock( &mtxPedido );
+
+		if( sizeLDP( lPedido ) != 0 ){
+
+			noAux = lPedido->ultimo;
+			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
+			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
+			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
+			popBackLDP( lPedido );
+
+		}
+
+		pthread_mutex_unlock( &mtxPedido );
+
+	}
 
 }
