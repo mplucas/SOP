@@ -47,7 +47,7 @@ void pushBackLDE( listaEstoque* lista, lancheEstoque le ){
 
 void pushFrontLDE( listaEstoque* lista, lancheEstoque le ){
 
-  noEstoque* n    = criarNoLDE( le );
+	noEstoque* n    = criarNoLDE( le );
 	noEstoque* temp = lista->primeiro;
 
 	if(temp != NULL){
@@ -63,7 +63,7 @@ void pushFrontLDE( listaEstoque* lista, lancheEstoque le ){
 
 int sizeLDE( listaEstoque* lista ){
 
-  noEstoque* temp = lista->primeiro;
+	noEstoque* temp = lista->primeiro;
 	int sizeLDE     = 0;
 
 	while(temp != NULL){
@@ -82,10 +82,12 @@ noEstoque* buscaPorNomeLDE( listaEstoque* lista, char* nomeBusca ){
 	no = lista->primeiro;
 
 	while(no != NULL){
+
 		if( strcmp( no->le.nome, nomeBusca ) == 0 ){
-      		break;
+			break;
 		}
 		no = no->proximo;
+
 	}
 
 	return no;
@@ -136,7 +138,7 @@ noPedido* criarNoLDP( unsigned int atendente, unsigned int valor ){
 
 void pushBackLDP( listaPedido* lista, unsigned int atendente, unsigned int valor ){
 
-  noPedido* n = criarNoLDP( atendente, valor );
+	noPedido* n = criarNoLDP( atendente, valor );
 	noPedido* temp = lista->ultimo;
 
 	if(temp != NULL){
@@ -192,29 +194,29 @@ void mostraLDP( listaPedido* lista ){
 
 int contaLinhasArq( char* nomearq ){
 
-  FILE* f;
-  char  c;
-  int   nLinhas = 0;
+	FILE* f;
+	char  c;
+	int   nLinhas = 0;
 
-  // Open the file
-  f = fopen( nomearq, "r" );
+	// Open the file
+	f = fopen( nomearq, "r" );
 
-  // Check if file exists
-  if (f == NULL)
-  {
-      printf("Could not open file %s", nomearq);
-      return 0;
-  }
+	// Check if file exists
+	if (f == NULL)
+	{
+		printf("Could not open file %s", nomearq);
+		return 0;
+	}
 
-  // Extract characters from file and store in character c
-  for (c = getc(f); c != EOF; c = getc(f))
-      if (c == '\n') // Increment count if this character is newline
-          nLinhas = nLinhas + 1;
+	// Extract characters from file and store in character c
+	for (c = getc(f); c != EOF; c = getc(f))
+	if (c == '\n') // Increment count if this character is newline
+	nLinhas = nLinhas + 1;
 
-  // Close the file
-  fclose(f);
+	// Close the file
+	fclose(f);
 
-  return nLinhas;
+	return nLinhas;
 
 }
 
@@ -231,34 +233,34 @@ char* leNome( char buffer[1000] ){
 
 listaEstoque* leArqEstoque( char* nomearq ){
 
-  FILE* f;
-  int   nLinhas;
-  int   i;
-  char  cAux[1000];
-  lancheEstoque leAux;
-  listaEstoque*   lista;
+	FILE* f;
+	int   nLinhas;
+	int   i;
+	char  cAux[1000];
+	lancheEstoque leAux;
+	listaEstoque*   lista;
 
-  lista = criarLDE();
-  f     = fopen( nomearq, "r" );
+	lista = criarLDE();
+	f     = fopen( nomearq, "r" );
 
-  if( f == NULL ){
-      printf("\nErro na abertura do arquivo!\n");
-  }
+	if( f == NULL ){
+		printf("\nErro na abertura do arquivo!\n");
+	}
 
-  nLinhas = contaLinhasArq( nomearq );
+	nLinhas = contaLinhasArq( nomearq );
 
-  for( i = 0; i < nLinhas; i++ ){
-    fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
+	for( i = 0; i < nLinhas; i++ ){
+		fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
 		leAux.nome = leNome( cAux );
 		//printf( fmtestoque, cAux, leAux.preco, leAux.quantidade );
-    pushBackLDE( lista, leAux );
-  }
+		pushBackLDE( lista, leAux );
+	}
 
-  fclose( f );
+	fclose( f );
 
-  //mostraLDE( lista );
+	//mostraLDE( lista );
 
-  return lista;
+	return lista;
 
 }
 
@@ -299,15 +301,15 @@ void *processaPedido( void *arg ){
 	strcat( nomeArqPed, cAux );
 	f = fopen( nomeArqPed, "r" );
 
-  if( f == NULL ){
-      printf("\nErro na abertura do arquivo!\n");
-  }
+	if( f == NULL ){
+		printf("\nErro na abertura do arquivo!\n");
+	}
 
 	nLinhas = contaLinhasArq( nomeArqPed );
 
-  for( i = 0; i < nLinhas; i++ ){
+	for( i = 0; i < nLinhas; i++ ){
 
-    fscanf( f, "%s\t%u\n", cAux, &quantPed );
+		fscanf( f, "%s\t%u\n", cAux, &quantPed );
 		nomePed = leNome( cAux );
 		noAux = buscaPorNomeLDE( lEstoque, nomePed );
 
@@ -322,14 +324,14 @@ void *processaPedido( void *arg ){
 
 		}
 
-  }
+	}
 
 	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
 	pthread_cond_signal( &condFim );
 	pthread_mutex_unlock( &mtxFimPedido );
 
-  fclose( f );
+	fclose( f );
 
 }
 

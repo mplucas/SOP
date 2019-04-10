@@ -30,8 +30,8 @@ typedef struct lp
 typedef struct np
 {
 	lanchePedido lp;
-	struct ne*   proximo;
-	struct ne*   anterior;
+	struct np*   proximo;
+	struct np*   anterior;
 } noPedido;
 
 typedef struct ldp

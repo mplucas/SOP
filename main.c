@@ -42,6 +42,7 @@ int main( int argc, char *argv[] ) {
   lEstoque = leArqEstoque( nomearq );
   lPedido = criarLDP();
   tAtendente = malloc( sizeof( pthread_t ) * nthr );
+  tCaixa = malloc( sizeof( pthread_t ) );
 
   printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
   mostraLDE( lEstoque );
