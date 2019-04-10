@@ -25,61 +25,61 @@ imprime_estoque(); */
 // testes: for i in `seq 1 10`; do ./a.out 2 a; done
 int main( int argc, char *argv[] ) {
 
-  setbuf(stdout, NULL);
+    setbuf(stdout, NULL);
 
-  int  rc;
-  long t;
-  pthread_t *tAtendente;
-  pthread_t tCaixa;
+    int  rc;
+    long t;
+    pthread_t *tAtendente;
+    pthread_t tCaixa;
 
-  if( argc != 3 ){
-    printf( "Parametros nao informados!! %i", argc );
+    if( argc != 3 ){
+        printf( "Parametros nao informados!! %i", argc );
+        return 0;
+    }
+
+    nthr    = atoi( argv[1] );
+    nomearq = argv[2];
+    lEstoque = leArqEstoque( nomearq );
+    lPedido = criarLDP();
+    tAtendente = malloc( sizeof( pthread_t ) * nthr );
+    tCaixa = malloc( sizeof( pthread_t ) );
+
+    printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
+    mostraLDE( lEstoque );
+
+    for( t = 0; t < nthr; t++ ){
+
+        rc = pthread_create( tAtendente[ t ], NULL, processaPedido, ( void* ) t );
+        if( rc ){
+            printf( "ERRO - rc=%d\n", rc );
+            exit( -1 );
+        }
+        printf("\nCriou atendente %i", t );
+
+    }
+
+    printf("\n tentando criar caixa" );
+    rc = pthread_create( tCaixa, NULL, (void *)processaCaixa, NULL );
+    if( rc ){
+        printf( "ERRO - rc=%d\n", rc );
+        exit( -1 );
+    }
+    printf("\nCriou caixa" );
+
+    pthread_mutex_lock( &mtxFimPedido );
+    while( fimThreads != nthr ){
+        pthread_cond_wait( &condFim, &mtxFimPedido );
+    }
+    pthread_mutex_unlock( &mtxFimPedido );
+
+    printf( "\nLista após execucao das threads:\n" );
+    mostraLDE( lEstoque );
+    printf( "------------------------------------\n" );
+    printf( "Lista de valores de pedido por atendente:\n" );
+    mostraLDP( lPedido );
+
+    pthread_exit(NULL);
+
     return 0;
-  }
-
-  nthr    = atoi( argv[1] );
-  nomearq = argv[2];
-  lEstoque = leArqEstoque( nomearq );
-  lPedido = criarLDP();
-  tAtendente = malloc( sizeof( pthread_t ) * nthr );
-  tCaixa = malloc( sizeof( pthread_t ) );
-
-  printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
-  mostraLDE( lEstoque );
-
-  for( t = 0; t < nthr; t++ ){
-
-      rc = pthread_create( tAtendente[ t ], NULL, processaPedido, ( void* ) t );
-      if( rc ){
-          printf( "ERRO - rc=%d\n", rc );
-          exit( -1 );
-      }
-      printf("\nCriou atendente %i", t );
-
-  }
-
-  printf("\n tentando criar caixa" );
-  rc = pthread_create( tCaixa, NULL, (void *)processaCaixa, NULL );
-  if( rc ){
-      printf( "ERRO - rc=%d\n", rc );
-      exit( -1 );
-  }
-  printf("\nCriou caixa" );
-
-  pthread_mutex_lock( &mtxFimPedido );
-  while( fimThreads != nthr ){
-    pthread_cond_wait( &condFim, &mtxFimPedido );
-  }
-  pthread_mutex_unlock( &mtxFimPedido );
-
-  printf( "\nLista após execucao das threads:\n" );
-  mostraLDE( lEstoque );
-  printf( "------------------------------------\n" );
-  printf( "Lista de valores de pedido por atendente:\n" );
-  mostraLDP( lPedido );
-
-  pthread_exit(NULL);
-
-  return 0;
 
 }
