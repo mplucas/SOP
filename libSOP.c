@@ -315,11 +315,19 @@ void *processaPedido( void *arg ){
 
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
+			// wait( mutex )
 			pthread_mutex_lock( &mtxPedido );
+
+			// processamento
 			// retira produtos do estoque
 			noAux->le.quantidade -= quantPed;
 			// adiciona pedido na fila para processamento do caixa
 			pushBackLDP( lPedido, tid + 1, noAux->le.preco * quantPed );
+
+			// signal( mutex )
+			// signal( cheio )
+			cheio++;
+			pthread_cond_signal( &condCheio );
 			pthread_mutex_unlock( &mtxPedido );
 
 		}
@@ -371,22 +379,40 @@ void *processaCaixa( void *arg ){
 	}
 	printf( "\n Alocado matriz de relatorio[%i][3].\n", nthr );
 
-	while( fimThreads != nthr ){
+	while( true ){
 
+		// wait( cheio )
+		// wait( mutex )
 		pthread_mutex_lock( &mtxPedido );
+		while( !cheio ){
+				pthread_cond_wait( &condCheio, &mtxPedido );
+		}
 
-		if( sizeLDP( lPedido ) != 0 ){
-
-			noAux = lPedido->ultimo;
+		// processamento
+		noAux = lPedido->ultimo;
+		if( noAux->lp.atendente != -1 ){
 			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
 			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
 			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
 			popBackLDP( lPedido );
-
 		}
 
+		// signal( mutex )
+		cheio--;
 		pthread_mutex_unlock( &mtxPedido );
 
+		if( noAux->lp.atendente == -1 ){
+			break;
+		}
+
+	}
+
+	while( sizeLDP( lPedido ) != 0 ){
+		noAux = lPedido->ultimo;
+		relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
+		relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
+		relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
+		popBackLDP( lPedido );
 	}
 
 	printf( "\n Populada matriz de relatorio.\n" );
