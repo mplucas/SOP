@@ -56,29 +56,26 @@ int main( int argc, char *argv[] ) {
             printf( "ERRO - rc=%d\n", rc );
             exit( -1 );
         }
-        printf("\nCriou atendente %i", t );
 
     }
 
-    printf("\n tentando criar caixa" );
     rc = pthread_create( tCaixa, NULL, (void *)processaCaixa, NULL );
     if( rc ){
         printf( "ERRO - rc=%d\n", rc );
         exit( -1 );
     }
-    printf("\nCriou caixa" );
 
-    pthread_mutex_lock( &mtxFimPedido );
-    while( fimThreads != nthr ){
-        pthread_cond_wait( &condFim, &mtxFimPedido );
-    }
-    pthread_mutex_unlock( &mtxFimPedido );
-
-    printf( "\nLista após execucao das threads:\n" );
-    mostraLDE( lEstoque );
-    printf( "------------------------------------\n" );
-    printf( "Lista de valores de pedido por atendente:\n" );
-    mostraLDP( lPedido );
+    // pthread_mutex_lock( &mtxFimPedido );
+    // while( fimThreads != nthr ){
+    //     pthread_cond_wait( &condFim, &mtxFimPedido );
+    // }
+    // pthread_mutex_unlock( &mtxFimPedido );
+    //
+    // printf( "\nLista após execucao das threads:\n" );
+    // mostraLDE( lEstoque );
+    // printf( "------------------------------------\n" );
+    // printf( "Lista de valores de pedido por atendente:\n" );
+    // mostraLDP( lPedido );
 
     pthread_exit(NULL);
 
