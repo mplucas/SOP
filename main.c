@@ -74,11 +74,11 @@ int main( int argc, char *argv[] ) {
     }
     pthread_mutex_unlock( &mtxFimPedido );
 
-    // printf( "\nLista após execucao das threads:\n" );
-    // mostraLDE( lEstoque );
-    // printf( "------------------------------------\n" );
-    // printf( "Lista de valores de pedido por atendente:\n" );
-    // mostraLDP( lPedido );
+    printf( "\nLista após execucao das threads:\n" );
+    mostraLDE( lEstoque );
+    printf( "------------------------------------\n" );
+    printf( "Lista de valores de pedido por atendente:\n" );
+    mostraLDP( lPedido );
 
     pthread_exit(NULL);
 

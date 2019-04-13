@@ -163,6 +163,17 @@ void popBackLDP( listaPedido* lista ){
 
 }
 
+void popFrontLDP( listaPedido* lista ){
+
+	noPedido* primeiro = lista->primeiro;
+
+	if( primeiro != NULL ){
+		primeiro->proximo->anterior = NULL;
+		free( primeiro );
+	}
+
+}
+
 int sizeLDP( listaPedido* lista ){
 
   noPedido* temp = lista->primeiro;
@@ -282,6 +293,7 @@ enquanto (houver pedidos a processar) {
 } */
 
 void *processaPedido( void *arg ){
+	printf( "\nEntrou em pedido.\n" );
 
 	long  tid;
 	char  cAux[1000];
@@ -336,6 +348,10 @@ void *processaPedido( void *arg ){
 
 	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
+	if( fimThreads == nthr ){
+		pushBackLDP( lPedido, -1, -1 );
+		printf( "\nTerminou threads concorrentes" );
+	}
 	pthread_cond_signal( &condFim );
 	pthread_mutex_unlock( &mtxFimPedido );
 
@@ -379,22 +395,22 @@ void *processaCaixa( void *arg ){
 	}
 	printf( "\n Alocado matriz de relatorio[%i][3].\n", nthr );
 
-	while( true ){
+	while( 1 ){
 
 		// wait( cheio )
 		// wait( mutex )
 		pthread_mutex_lock( &mtxPedido );
 		while( !cheio ){
-				pthread_cond_wait( &condCheio, &mtxPedido );
+			pthread_cond_wait( &condCheio, &mtxPedido );
 		}
 
 		// processamento
-		noAux = lPedido->ultimo;
+		noAux = lPedido->primeiro;
 		if( noAux->lp.atendente != -1 ){
 			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
 			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
 			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
-			popBackLDP( lPedido );
+			popFrontLDP( lPedido );
 		}
 
 		// signal( mutex )
@@ -407,12 +423,14 @@ void *processaCaixa( void *arg ){
 
 	}
 
+	printf( "\nsaiu da protecao de threads" );
+
 	while( sizeLDP( lPedido ) != 0 ){
-		noAux = lPedido->ultimo;
+		noAux = lPedido->primeiro;
 		relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
 		relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
 		relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
-		popBackLDP( lPedido );
+		popFrontLDP( lPedido );
 	}
 
 	printf( "\n Populada matriz de relatorio.\n" );
