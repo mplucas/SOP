@@ -268,7 +268,7 @@ listaEstoque* leArqEstoque( char* nomearq ){
 	}
 
 	fclose( f );
-	
+
 	return lista;
 
 }
@@ -291,6 +291,9 @@ enquanto (houver pedidos a processar) {
 } */
 
 void *processaPedido( void *arg ){
+
+	// Espera barreira para que threads comecem ao mesmo tempo
+	pthread_barrier_wait( &barreira );
 
 	long  tid;
 	char  cAux[1000];
@@ -324,7 +327,8 @@ void *processaPedido( void *arg ){
 
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
-			// wait( mutex )
+			// protecao da variavel global lPedido que contem os pedidos a serem
+			// processados pelo caixa
 			pthread_mutex_lock( &mtxPedido );
 
 			// processamento
@@ -333,13 +337,16 @@ void *processaPedido( void *arg ){
 			// adiciona pedido na fila para processamento do caixa
 			pushBackLDP( lPedido, tid + 1, noAux->le.preco * quantPed );
 
-			// signal( mutex )
 			pthread_mutex_unlock( &mtxPedido );
 
 		}
 
 	}
 
+	// verifica se todas as threads de atendente terminaram para adicionar um
+	// pedido marcado na lista de pedidos processada pelo caixa, nesse caso a
+	// ultima thread de atendente a ser processada marca o final da lista de
+	// pedidos
 	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
 	if( fimThreads == nthr ){
@@ -367,6 +374,9 @@ void printRelatorio( int** m ){
 
 void *processaCaixa( void *arg ){
 
+	// Espera barreira para que threads comecem ao mesmo tempo
+	pthread_barrier_wait( &barreira );
+
 	// matriz para mostrar as informacoes do relatorio financeiro
 	// [x][0] - Atendente
 	// [x][1] - Pedidos
@@ -388,7 +398,8 @@ void *processaCaixa( void *arg ){
 
 	while( 1 ){
 
-		// processamento
+		// protecao da variavel global lPedido que contem os pedidos a serem
+		// processados pelo caixa
 		pthread_mutex_lock( &mtxPedido );
 		noAux = lPedido->primeiro;
 
@@ -403,33 +414,24 @@ void *processaCaixa( void *arg ){
 				popFrontLDP( lPedido );
 			}
 
-			// signal( mutex )
-
 		}
 
 		pthread_mutex_unlock( &mtxPedido );
 
+		// condicao que verifica se a fila chegou ao nó marcado pela ultima threads
+		// de atendente processada, desse modo se conclui que não há mais pedidos
 		if( idAtendente == 0 ){
 			break;
 		}
 
 	}
 
-	while( sizeLDP( lPedido ) != 0 ){
-		noAux = lPedido->primeiro;
-		if( noAux->lp.atendente != 0 ){
-			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
-			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
-			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
-			receitaTotal += noAux->lp.valor;
-		}
-		popFrontLDP( lPedido );
-	}
-
+	// mostra relatorio financeiro
 	printf( "\n***** Relatorio financeiro *****\n" );
 	printf("\nAtendente   Pedidos   Valor (R$)" );
 	printRelatorio( relatorio );
 
+	// retorna valor da receita total obtida para a main
 	pthread_exit( receitaTotal );
 
 }

@@ -12,7 +12,7 @@ listaPedido  *lPedido;
 listaEstoque *lEstoque;
 pthread_mutex_t mtxPedido;
 pthread_mutex_t mtxFimPedido;
-pthread_cond_t  condCheio;
+pthread_barrier_t barreira;
 
 /* inicializa_lanches(arq_ofertas);
 cria_threads();
@@ -44,6 +44,14 @@ int main( int argc, char *argv[] ) {
     lPedido    = criarLDP();
     tAtendente = malloc( sizeof( pthread_t ) * nthr );
 
+    // cira barreira para que as threads inciem juntas
+    rc = pthread_barrier_init( &barreira, NULL, nthr + 1 );
+    if (rc != 0) {
+        printf( "ERRO barreira - rc=%d\n", rc );
+        exit(1);
+    }
+
+    // cria threads de atendentes
     for( t = 0; t < nthr; t++ ){
 
         rc = pthread_create( tAtendente[ t ], NULL, processaPedido, ( void* ) t );
@@ -54,15 +62,20 @@ int main( int argc, char *argv[] ) {
 
     }
 
+    // cria thread de caixa
     rc = pthread_create( &tCaixa, NULL, (void *)processaCaixa, NULL );
     if( rc ){
         printf( "ERRO - rc=%d\n", rc );
         exit( -1 );
     }
 
+    // recupera valor da thread caixa
     pthread_join( tCaixa, &receitaTotal );
+
+    // imprime receita total
     printf("\nReceita total: R$ %li\n", receitaTotal );
 
+    // imprime estoque de lanches inicial e final
     printf( "\n***** Estoque de lanches *****\n" );
     printf( "\nLanche            Inicial      Final\n" );
     printDiffEstoque( lEstoque );

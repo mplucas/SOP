@@ -9,4 +9,4 @@ extern listaPedido  *lPedido;
 extern listaEstoque *lEstoque;
 extern pthread_mutex_t mtxPedido;
 extern pthread_mutex_t mtxFimPedido;
-extern pthread_cond_t  condCheio;
+extern pthread_barrier_t barreira;
