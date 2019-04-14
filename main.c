@@ -8,13 +8,11 @@
 char *nomearq;
 int  nthr;
 int  fimThreads = 0;
-int  cheio = 0;
 listaPedido  *lPedido;
 listaEstoque *lEstoque;
 pthread_mutex_t mtxPedido;
 pthread_mutex_t mtxFimPedido;
 pthread_cond_t  condCheio;
-pthread_cond_t  condFim;
 
 /* inicializa_lanches(arq_ofertas);
 cria_threads();
@@ -29,8 +27,9 @@ int main( int argc, char *argv[] ) {
 
     setbuf(stdout, NULL);
 
-    int  rc;
-    long t;
+    int   rc;
+    long  t;
+    long  receitaTotal;
     pthread_t *tAtendente;
     pthread_t tCaixa;
 
@@ -44,10 +43,6 @@ int main( int argc, char *argv[] ) {
     lEstoque   = leArqEstoque( nomearq );
     lPedido    = criarLDP();
     tAtendente = malloc( sizeof( pthread_t ) * nthr );
-    tCaixa     = malloc( sizeof( pthread_t ) );
-
-    printf( "\n------------------------------------\nLista antes da execucao das threads:\n" );
-    mostraLDE( lEstoque );
 
     for( t = 0; t < nthr; t++ ){
 
@@ -59,23 +54,19 @@ int main( int argc, char *argv[] ) {
 
     }
 
-    rc = pthread_create( tCaixa, NULL, (void *)processaCaixa, NULL );
+    rc = pthread_create( &tCaixa, NULL, (void *)processaCaixa, NULL );
     if( rc ){
         printf( "ERRO - rc=%d\n", rc );
         exit( -1 );
     }
 
-    // pthread_mutex_lock( &mtxFimPedido );
-    // while( fimThreads != nthr ){
-    //     pthread_cond_wait( &condFim, &mtxFimPedido );
-    // }
-    // pthread_mutex_unlock( &mtxFimPedido );
-    //
-    // printf( "\nLista após execucao das threads:\n" );
-    // mostraLDE( lEstoque );
-    // printf( "------------------------------------\n" );
-    // printf( "Lista de valores de pedido por atendente:\n" );
-    // mostraLDP( lPedido );
+    pthread_join( tCaixa, &receitaTotal );
+    printf("\nReceita total: R$ %li\n", receitaTotal );
+
+    printf( "\n***** Estoque de lanches *****\n" );
+    printf( "\nLanche            Inicial      Final\n" );
+    printDiffEstoque( lEstoque );
+    printf( "\n" );
 
     pthread_exit(NULL);
 

@@ -67,8 +67,10 @@ int sizeLDE( listaEstoque* lista ){
 	int sizeLDE     = 0;
 
 	while(temp != NULL){
+
 		temp = temp->proximo;
 		sizeLDE++;
+
 	}
 
 	return sizeLDE;
@@ -101,7 +103,7 @@ void mostraLDE( listaEstoque* lista ){
 
 	while( n != NULL ){
 
-		printf( fmtestoque, n->le.nome, n->le.preco, n->le.quantidade );
+		printf( "\n%s\t%u\t%u\t%u", n->le.nome, n->le.preco, n->le.quantidade, n->le.quantidadeInicial );
 		n = n->proximo;
 
 	}
@@ -176,8 +178,10 @@ int sizeLDP( listaPedido* lista ){
 	int sizeLDP = 0;
 
 	while(temp != NULL){
+
 		temp = temp->proximo;
 		sizeLDP++;
+
 	}
 
 	return sizeLDP;
@@ -259,14 +263,12 @@ listaEstoque* leArqEstoque( char* nomearq ){
 	for( i = 0; i < nLinhas; i++ ){
 		fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
 		leAux.nome = leNome( cAux );
-		//printf( fmtestoque, cAux, leAux.preco, leAux.quantidade );
+		leAux.quantidadeInicial = leAux.quantidade;
 		pushBackLDE( lista, leAux );
 	}
 
 	fclose( f );
-
-	//mostraLDE( lista );
-
+	
 	return lista;
 
 }
@@ -323,9 +325,7 @@ void *processaPedido( void *arg ){
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
 
 			// wait( mutex )
-			printf("\n tentando lock mtxPedido");
 			pthread_mutex_lock( &mtxPedido );
-			printf("\n lock mtxPedido");
 
 			// processamento
 			// retira produtos do estoque
@@ -334,52 +334,33 @@ void *processaPedido( void *arg ){
 			pushBackLDP( lPedido, tid + 1, noAux->le.preco * quantPed );
 
 			// signal( mutex )
-			// signal( cheio )
-			printf("\n signal condCheio cheio = %i + 1", cheio);
-			cheio++;
-			pthread_cond_signal( &condCheio );
-			printf("\n tentando unlock mtxPedido");
 			pthread_mutex_unlock( &mtxPedido );
-			printf("\n unlock mtxPedido 2");
 
 		}
 
 	}
 
-	printf("\n tentando lock mtxFimPedido");
 	pthread_mutex_lock( &mtxFimPedido );
-	printf("\n lock mtxFimPedido");
 	fimThreads++;
 	if( fimThreads == nthr ){
-		printf("\n tentando lock mtxPedido");
 		pthread_mutex_lock( &mtxPedido );
-		printf("\n lock mtxPedido");
 		pushBackLDP( lPedido, 0, 0 );
-		printf("\n\nAdicionado atendente marcador e agora so tem a thread caixa\n");
-		printf("\n tentando unlock mtxPedido");
 		pthread_mutex_unlock( &mtxPedido );
-		printf("\n unlock mtxPedido 3");
 	}
-	printf("\n signal condFim");
-	pthread_cond_signal( &condFim );
-	printf("\n tentando unlock mtxFimPedido");
 	pthread_mutex_unlock( &mtxFimPedido );
-	printf("\n unlock mtxFimPedido");
 
 	fclose( f );
 
 }
 
 
-void printMatrix( int** m ){
+void printRelatorio( int** m ){
 
-	int i, j;
+	int i;
 
+	printf( "\n" );
 	for( i = 0; i < nthr; i++ ){
-		printf( "\n" );
-		for( j = 0; j < 3; j++ ){
-			printf( "%i ", m[ i ][ j ] );
-		}
+		printf( fmtfinanc, m[ i ][ 0 ], m[ i ][ 1 ], m[ i ][ 2 ] );
 	}
 
 }
@@ -392,8 +373,9 @@ void *processaCaixa( void *arg ){
 	// [x][2] - Valor
 	int **relatorio;
 	int i;
-	int idAtendente;
+	int idAtendente = -1;
 	noPedido *noAux;
+	unsigned int receitaTotal = 0;
 
 	// incializa matriz para guardar valores do relatorio
 	relatorio = malloc( sizeof( int* ) * nthr );
@@ -406,64 +388,63 @@ void *processaCaixa( void *arg ){
 
 	while( 1 ){
 
-		printf( "\n1" );
-		// verifica se precisa fazer o processo protegido (se há outras threads concorrentes)
-		if( fimThreads == nthr ){
-			break;
-		}
-		printf( "\n2" );
-
-		// wait( cheio )
-		// wait( mutex )
-		printf("\n tentando lock mtxPedido");
-		pthread_mutex_lock( &mtxPedido );
-		printf("\n lock mtxPedido cheio = %i ", cheio);
-		while( !cheio ){
-			printf( "\n3" );
-			printf("\n wait condCheio cheio = %i", cheio);
-			pthread_cond_wait( &condCheio, &mtxPedido );
-		}
-
 		// processamento
+		pthread_mutex_lock( &mtxPedido );
 		noAux = lPedido->primeiro;
-		idAtendente = noAux->lp.atendente;
-		if( idAtendente != 0 ){
-			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = idAtendente;
-			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
-			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
-			popFrontLDP( lPedido );
+
+		if( noAux != NULL ){
+
+			idAtendente = noAux->lp.atendente;
+			if( idAtendente != 0 ){
+				relatorio[ noAux->lp.atendente - 1 ][ 0 ] = idAtendente;
+				relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
+				relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
+				receitaTotal += noAux->lp.valor;
+				popFrontLDP( lPedido );
+			}
+
+			// signal( mutex )
+
 		}
 
-		// signal( mutex )
-		printf("\n cheio = %i - 1 ", cheio );
-		cheio--;
-		printf("\n tentando unlock mtxPedido");
 		pthread_mutex_unlock( &mtxPedido );
-		printf("\n unlock mtxPedido 1");
 
 		if( idAtendente == 0 ){
 			break;
 		}
-		printf( "\n4" );
 
 	}
-	printf( "\n6" );
 
 	while( sizeLDP( lPedido ) != 0 ){
-		printf( "\n5" );
 		noAux = lPedido->primeiro;
 		if( noAux->lp.atendente != 0 ){
 			relatorio[ noAux->lp.atendente - 1 ][ 0 ] = noAux->lp.atendente;
 			relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
 			relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
+			receitaTotal += noAux->lp.valor;
 		}
 		popFrontLDP( lPedido );
 	}
 
-	printf( "\n7" );
+	printf( "\n***** Relatorio financeiro *****\n" );
+	printf("\nAtendente   Pedidos   Valor (R$)" );
+	printRelatorio( relatorio );
 
-	printf( "\nRelatorio Financeiro:" );
-	printf("\nAtendente pedidos valor\n" );
-	printMatrix( relatorio );
+	pthread_exit( receitaTotal );
+
+}
+
+void printDiffEstoque( listaEstoque *lista ){
+
+	noEstoque* n;
+
+	n = lista->primeiro;
+
+	while( n != NULL ){
+
+		printf( fmtestoque, n->le.nome, n->le.quantidadeInicial, n->le.quantidade );
+		n = n->proximo;
+
+	}
 
 }

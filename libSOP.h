@@ -5,6 +5,7 @@ typedef struct le
   char *nome;
   unsigned int preco;
   unsigned int quantidade;
+  unsigned int quantidadeInicial;
 } lancheEstoque;
 
 typedef struct ne
@@ -43,8 +44,7 @@ typedef struct ldp
 // Funcoes
 
 listaEstoque* leArqEstoque( char* nomearq );
-void mostraLDE( listaEstoque* lista );
 void *processaPedido( void *arg );
 listaPedido* criarLDP();
-void mostraLDP( listaPedido* lista );
 void *processaCaixa( void *arg );
+void printDiffEstoque( listaEstoque *le );
