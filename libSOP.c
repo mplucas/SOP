@@ -329,7 +329,9 @@ void *processaPedido( void *arg ){
 
 			// protecao da variavel global lPedido que contem os pedidos a serem
 			// processados pelo caixa
+			// printf("\ntentando lock 3");
 			pthread_mutex_lock( &mtxPedido );
+			// printf("\nconseguiu lock 3");
 
 			// processamento
 			// retira produtos do estoque
@@ -340,8 +342,10 @@ void *processaPedido( void *arg ){
 			// Sinaliza thread caixa que há pedidos a serem processados
 			proximoPedido = lPedido->primeiro;
 			//signal
+			// printf( "\nsignal 1" );
 			pthread_cond_signal( &condPedido );
 
+			// printf("\nunlock 3");
 			pthread_mutex_unlock( &mtxPedido );
 
 		}
@@ -355,13 +359,27 @@ void *processaPedido( void *arg ){
 	pthread_mutex_lock( &mtxFimPedido );
 	fimThreads++;
 	if( fimThreads == nthr ){
+
+		// Adiciona pedido marcado
+		// printf("\ntentando lock 2");
 		pthread_mutex_lock( &mtxPedido );
+		// printf("\nconsguiu lock 2");
 		pushBackLDP( lPedido, 0, 0 );
+
+		// Sinaliza thread caixa que há pedidos a serem processados
+		proximoPedido = lPedido->primeiro;
+		//signal
+		// printf( "\nsignal 2 acabo threads" );
+		pthread_cond_signal( &condPedido );
+
+		// printf("\nunlock 2");
 		pthread_mutex_unlock( &mtxPedido );
+
 	}
 	pthread_mutex_unlock( &mtxFimPedido );
 
 	fclose( f );
+	pthread_exit( NULL );
 
 }
 
@@ -406,26 +424,28 @@ void *processaCaixa( void *arg ){
 
 		// protecao da variavel global lPedido que contem os pedidos a serem
 		// processados pelo caixa
+		// printf("\ntentando lock 1");
 		pthread_mutex_lock( &mtxPedido );
+		// printf("\nconseguiu lock 1");
 
-		if( proximoPedido != NULL ){
-
-			idAtendente = proximoPedido->lp.atendente;
-			if( idAtendente != 0 ){
-				relatorio[ proximoPedido->lp.atendente - 1 ][ 0 ] = idAtendente;
-				relatorio[ proximoPedido->lp.atendente - 1 ][ 1 ]++;
-				relatorio[ proximoPedido->lp.atendente - 1 ][ 2 ] += proximoPedido->lp.valor;
-				receitaTotal += proximoPedido->lp.valor;
-				popFrontLDP( lPedido );
-				proximoPedido = lPedido->primeiro;
-			}
-
-		}else{
+		while( proximoPedido == NULL ){
 			//espera alguma thread de atendente realizar um pedido
 			//wait
-			pthread_cond_wait( &condPedido, &mtxFimPedido );
+			// printf( "\nWait----------------------------------------------------" );
+			pthread_cond_wait( &condPedido, &mtxPedido );
 		}
 
+		idAtendente = proximoPedido->lp.atendente;
+		if( idAtendente != 0 ){
+			relatorio[ proximoPedido->lp.atendente - 1 ][ 0 ] = idAtendente;
+			relatorio[ proximoPedido->lp.atendente - 1 ][ 1 ]++;
+			relatorio[ proximoPedido->lp.atendente - 1 ][ 2 ] += proximoPedido->lp.valor;
+			receitaTotal += proximoPedido->lp.valor;
+			popFrontLDP( lPedido );
+			proximoPedido = lPedido->primeiro;
+		}
+
+		// printf("\nunlock 1");
 		pthread_mutex_unlock( &mtxPedido );
 
 	}
@@ -436,7 +456,7 @@ void *processaCaixa( void *arg ){
 	printRelatorio( relatorio );
 
 	// retorna valor da receita total obtida para a main
-	pthread_exit( receitaTotal );
+	pthread_exit( ( void* ) receitaTotal );
 
 }
 

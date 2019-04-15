@@ -32,6 +32,7 @@ int main( int argc, char *argv[] ) {
     int   rc;
     long  t;
     long  receitaTotal;
+    void* retornoCaixa;
     pthread_t *tAtendente;
     pthread_t tCaixa;
 
@@ -56,7 +57,7 @@ int main( int argc, char *argv[] ) {
     // cria threads de atendentes
     for( t = 0; t < nthr; t++ ){
 
-        rc = pthread_create( tAtendente[ t ], NULL, processaPedido, ( void* ) t );
+        rc = pthread_create( tAtendente + t, NULL, processaPedido, ( void* ) t );
         if( rc ){
             printf( "ERRO - rc=%d\n", rc );
             exit( -1 );
@@ -72,7 +73,8 @@ int main( int argc, char *argv[] ) {
     }
 
     // recupera valor da thread caixa
-    pthread_join( tCaixa, &receitaTotal );
+    pthread_join( tCaixa, &retornoCaixa );
+    receitaTotal = ( long ) retornoCaixa;
 
     // imprime receita total
     printf("\nReceita total: R$ %li\n", receitaTotal );
