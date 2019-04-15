@@ -5,8 +5,10 @@
 extern char *nomearq;
 extern int  nthr;
 extern int  fimThreads;
+extern noPedido* proximoPedido;
 extern listaPedido  *lPedido;
 extern listaEstoque *lEstoque;
 extern pthread_mutex_t mtxPedido;
 extern pthread_mutex_t mtxFimPedido;
+extern pthread_cond_t  condPedido;
 extern pthread_barrier_t barreira;

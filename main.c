@@ -8,10 +8,12 @@
 char *nomearq;
 int  nthr;
 int  fimThreads = 0;
+noPedido* proximoPedido = NULL;
 listaPedido  *lPedido;
 listaEstoque *lEstoque;
 pthread_mutex_t mtxPedido;
 pthread_mutex_t mtxFimPedido;
+pthread_cond_t  condPedido;
 pthread_barrier_t barreira;
 
 /* inicializa_lanches(arq_ofertas);

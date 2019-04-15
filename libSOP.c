@@ -337,6 +337,11 @@ void *processaPedido( void *arg ){
 			// adiciona pedido na fila para processamento do caixa
 			pushBackLDP( lPedido, tid + 1, noAux->le.preco * quantPed );
 
+			// Sinaliza thread caixa que há pedidos a serem processados
+			proximoPedido = lPedido->primeiro;
+			//signal
+			pthread_cond_signal( &condPedido );
+
 			pthread_mutex_unlock( &mtxPedido );
 
 		}
@@ -384,7 +389,6 @@ void *processaCaixa( void *arg ){
 	int **relatorio;
 	int i;
 	int idAtendente = -1;
-	noPedido *noAux;
 	unsigned int receitaTotal = 0;
 
 	// incializa matriz para guardar valores do relatorio
@@ -396,33 +400,33 @@ void *processaCaixa( void *arg ){
 		relatorio[ i ][ 2 ] = 0;
 	}
 
-	while( 1 ){
+	// condicao que verifica se a fila chegou ao nó marcado pela ultima threads
+	// de atendente processada, desse modo se conclui que não há mais pedidos
+	while( idAtendente != 0 ){
 
 		// protecao da variavel global lPedido que contem os pedidos a serem
 		// processados pelo caixa
 		pthread_mutex_lock( &mtxPedido );
-		noAux = lPedido->primeiro;
 
-		if( noAux != NULL ){
+		if( proximoPedido != NULL ){
 
-			idAtendente = noAux->lp.atendente;
+			idAtendente = proximoPedido->lp.atendente;
 			if( idAtendente != 0 ){
-				relatorio[ noAux->lp.atendente - 1 ][ 0 ] = idAtendente;
-				relatorio[ noAux->lp.atendente - 1 ][ 1 ]++;
-				relatorio[ noAux->lp.atendente - 1 ][ 2 ] += noAux->lp.valor;
-				receitaTotal += noAux->lp.valor;
+				relatorio[ proximoPedido->lp.atendente - 1 ][ 0 ] = idAtendente;
+				relatorio[ proximoPedido->lp.atendente - 1 ][ 1 ]++;
+				relatorio[ proximoPedido->lp.atendente - 1 ][ 2 ] += proximoPedido->lp.valor;
+				receitaTotal += proximoPedido->lp.valor;
 				popFrontLDP( lPedido );
+				proximoPedido = lPedido->primeiro;
 			}
 
+		}else{
+			//espera alguma thread de atendente realizar um pedido
+			//wait
+			pthread_cond_wait( &condPedido, &mtxFimPedido );
 		}
 
 		pthread_mutex_unlock( &mtxPedido );
-
-		// condicao que verifica se a fila chegou ao nó marcado pela ultima threads
-		// de atendente processada, desse modo se conclui que não há mais pedidos
-		if( idAtendente == 0 ){
-			break;
-		}
 
 	}
 
