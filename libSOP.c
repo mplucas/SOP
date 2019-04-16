@@ -271,7 +271,7 @@ listaEstoque* leArqEstoque( char* nomearq ){
 	f     = fopen( nomearq, "r" );
 
 	if( f == NULL ){
-		printf( "\nErro na abertura do arquivo '%s'!\n", nomearq );
+		printf( "\nErro na abertura do arquivo '%s' (Eh necessario que o arquivo seja criado sem a extensao .txt e nao possua '.txt' em seu nome)!!\n", nomearq );
 		return NULL;
 	}
 
@@ -344,7 +344,7 @@ void *processaPedido( void *arg ){
 	f = fopen( nomeArqPed, "r" );
 
 	if( f == NULL ){
-		printf("\nErro na abertura do arquivo '%s'!\n", nomeArqPed );
+		printf("\nErro na abertura do arquivo '%s' (Eh necessario que o arquivo seja criado sem a extensao .txt e nao possua '.txt' em seu nome)!\n", nomeArqPed );
 		retorno = 0;
 		pthread_exit( ( void* ) retorno );
 	}
