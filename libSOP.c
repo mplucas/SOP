@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "libSOP.h"
 #include "utils.h"
@@ -242,6 +243,21 @@ char* leNome( char buffer[1000] ){
 
 }
 
+int is_number( char* s ){
+
+	int i;
+
+	for( i = 0; i < strlen( s ); i++ ){
+
+		if( !isdigit( s[ i ] ) )
+			return 0;
+
+	}
+
+	return 1;
+
+}
+
 listaEstoque* leArqEstoque( char* nomearq ){
 
 	FILE* f;
@@ -255,14 +271,27 @@ listaEstoque* leArqEstoque( char* nomearq ){
 	f     = fopen( nomearq, "r" );
 
 	if( f == NULL ){
-		printf("\nErro na abertura do arquivo!\n");
+		printf( "\nErro na abertura do arquivo '%s'!\n", nomearq );
+		return NULL;
 	}
 
 	nLinhas = contaLinhasArq( nomearq );
 
 	for( i = 0; i < nLinhas; i++ ){
-		fscanf( f, "%s\t%u\t%u\n", cAux, &leAux.preco, &leAux.quantidade );
+		fscanf( f, "%s\t", cAux );
 		leAux.nome = leNome( cAux );
+		fscanf( f, "%s\t", cAux );
+		if( !is_number( cAux ) ){
+			printf( "\nPreco informado incorretamente na linha %i do arquivo '%s'!\n", i + 1, nomearq );
+			return NULL;
+		}
+		leAux.preco = atoi( cAux );
+		fscanf( f, "%s\n", cAux );
+		if( !is_number( cAux ) ){
+			printf( "\nQuantidade informada incorretamente na linha %i do arquivo '%s'!\n", i + 1, nomearq );
+			return NULL;
+		}
+		leAux.quantidade = atoi( cAux );
 		leAux.quantidadeInicial = leAux.quantidade;
 		pushBackLDE( lista, leAux );
 	}
@@ -302,6 +331,7 @@ void *processaPedido( void *arg ){
 	int   nLinhas;
 	int   i;
 	int   quantPed;
+	int   retorno;
 	FILE* f;
 	noEstoque* noAux;
 
@@ -314,15 +344,24 @@ void *processaPedido( void *arg ){
 	f = fopen( nomeArqPed, "r" );
 
 	if( f == NULL ){
-		printf("\nErro na abertura do arquivo!\n");
+		printf("\nErro na abertura do arquivo '%s'!\n", nomeArqPed );
+		retorno = 0;
+		pthread_exit( ( void* ) retorno );
 	}
 
 	nLinhas = contaLinhasArq( nomeArqPed );
 
 	for( i = 0; i < nLinhas; i++ ){
 
-		fscanf( f, "%s\t%u\n", cAux, &quantPed );
+		fscanf( f, "%s\t", cAux );
 		nomePed = leNome( cAux );
+		fscanf( f, "%s\n", cAux );
+		if( !is_number( cAux ) ){
+			printf( "\nQuantidade informada incorretamente na linha %i do arquivo '%s'!\n", i + 1, nomeArqPed );
+			retorno = 0;
+			pthread_exit( ( void* ) retorno );
+		}
+		quantPed = atoi( cAux );
 		noAux   = buscaPorNomeLDE( lEstoque, nomePed );
 
 		if( ( noAux != NULL ) && ( noAux->le.quantidade >= quantPed ) ){
@@ -379,7 +418,8 @@ void *processaPedido( void *arg ){
 	pthread_mutex_unlock( &mtxFimPedido );
 
 	fclose( f );
-	pthread_exit( NULL );
+	retorno = 1;
+	pthread_exit( ( void* ) retorno );
 
 }
 

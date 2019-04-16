@@ -33,6 +33,8 @@ int main( int argc, char *argv[] ) {
     long  t;
     long  receitaTotal;
     void* retornoCaixa;
+    void* retornoAtendente;
+    int   sucessoAtendente;
     pthread_t *tAtendente;
     pthread_t tCaixa;
 
@@ -44,6 +46,11 @@ int main( int argc, char *argv[] ) {
     nthr       = atoi( argv[1] );
     nomearq    = argv[2];
     lEstoque   = leArqEstoque( nomearq );
+
+    if( lEstoque == NULL ){
+      return 0;
+    }
+
     lPedido    = criarLDP();
     tAtendente = malloc( sizeof( pthread_t ) * nthr );
 
@@ -70,6 +77,18 @@ int main( int argc, char *argv[] ) {
     if( rc ){
         printf( "ERRO - rc=%d\n", rc );
         exit( -1 );
+    }
+
+    // verifica se não houve erro com as threads de atendentes
+    for( t = 0; t < nthr; t++ ){
+
+        pthread_join( tAtendente[ t ], &retornoAtendente );
+        sucessoAtendente = ( int ) retornoAtendente;
+
+        if( !sucessoAtendente ){
+          return 0;
+        }
+
     }
 
     // recupera valor da thread caixa
